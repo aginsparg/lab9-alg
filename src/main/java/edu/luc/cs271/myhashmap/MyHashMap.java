@@ -30,9 +30,11 @@ public class MyHashMap<K, V> implements Map<K, V> {
 
   @Override
   public int size() {
-    // TODO add the sizes of all the chains
+    //  add the sizes of all the chains
     int result = 0;
-
+    for (int i = 0; i < table.size(); i++) {
+      result = result + table.get(i).size();
+    }
 
     return result;
   }
@@ -44,36 +46,61 @@ public class MyHashMap<K, V> implements Map<K, V> {
 
   @Override
   public boolean containsKey(final Object key) {
-    // TODO follow basic approach of remove below (though this will be much simpler)
+    //  follow basic approach of remove below (though this will be much simpler)
     final int index = calculateIndex(key);
+    final Iterator<Entry<K, V>> iter = table.get(index).iterator();
 
+    while (iter.hasNext()) {
+      final Entry<K, V> findingkey = iter.next();
+      if (findingkey.getKey().equals(key)) return true;
+    }
 
     return false;
   }
 
   @Override
   public boolean containsValue(final Object value) {
-    // TODO follow basic approach of remove below (though this will be much simpler)
+    //  follow basic approach of remove below (though this will be much simpler)
 
+    for (int i = 0; i < table.size(); i++) {
+      final Iterator<Entry<K, V>> iter = table.get(i).iterator();
+      while (iter.hasNext()) {
+        final Entry<K, V> findvalue = iter.next();
+        if (findvalue.getValue() == value) return true;
+      }
+    }
 
     return false;
   }
 
   @Override
   public V get(final Object key) {
-    // TODO follow basic approach of remove below (though this will be simpler)
+    // follow basic approach of remove below (though this will be simpler)
     final int index = calculateIndex(key);
-
+    final Iterator<Entry<K, V>> iter = table.get(index).iterator();
+    while (iter.hasNext()) {
+      final Entry<K, V> getting = iter.next();
+      if (getting.getKey().equals(key)) return getting.getValue();
+    }
 
     return null;
   }
 
   @Override
   public V put(final K key, final V value) {
-    // TODO follow basic approach of remove below (this will be similar)
+    //  follow basic approach of remove below (this will be similar)
+    V temp = null;
     final int index = calculateIndex(key);
-
-
+    final Iterator<Entry<K, V>> iter = table.get(index).iterator();
+    while (iter.hasNext()) {
+      final Entry<K, V> putting = iter.next();
+      if (putting.getKey().equals(key)) {
+        temp = putting.getValue();
+        putting.setValue(value);
+        return temp;
+      }
+    }
+    table.get(index).add(new AbstractMap.SimpleEntry<K, V>(key, value));
     return null;
   }
 
@@ -94,25 +121,30 @@ public class MyHashMap<K, V> implements Map<K, V> {
 
   @Override
   public void putAll(final Map<? extends K, ? extends V> m) {
-    // TODO add each entry in m's entrySet
-
-
+    //  add each entry in m's entrySet
+    for (Map.Entry<? extends K, ? extends V> entry : m.entrySet()) {
+      this.put(entry.getKey(), entry.getValue());
+    }
   }
 
   @Override
   public void clear() {
-    // TODO clear each chain
+    // clear each chain
 
-
+    for (int i = 0; i < table.size(); i++) {
+      table.get(i).clear();
+    }
   }
 
   /** The resulting keySet is not "backed" by the Map, so we keep it unmodifiable. */
   @Override
   public Set<K> keySet() {
     final Set<K> result = new HashSet<>();
-    // TODO populate the set
+    //  populate the set
 
-
+    for (int i = 0; i < table.size(); i++) {
+      for (Entry<K, V> e : table.get(i)) result.add(e.getKey());
+    }
     return Collections.unmodifiableSet(result);
   }
 
@@ -120,8 +152,10 @@ public class MyHashMap<K, V> implements Map<K, V> {
   @Override
   public Collection<V> values() {
     final List<V> result = new LinkedList<>();
-    // TODO populate the list
-
+    //  populate the list
+    for (int i = 0; i < table.size(); i++) {
+      for (Entry<K, V> e : table.get(i)) result.add(e.getValue());
+    }
 
     return Collections.unmodifiableCollection(result);
   }
@@ -130,16 +164,29 @@ public class MyHashMap<K, V> implements Map<K, V> {
   @Override
   public Set<Entry<K, V>> entrySet() {
     final Set<Entry<K, V>> result = new HashSet<>();
-    // TODO populate the set
+    //  populate the set
 
+    for (int i = 0; i < table.size(); i++) {
+      final Iterator<Entry<K, V>> iter = table.get(i).iterator();
+      while (iter.hasNext()) {
+        final Entry<K, V> adding = iter.next();
+        result.add(adding);
+      }
+    }
 
     return Collections.unmodifiableSet(result);
   }
 
   @Override
   public String toString() {
-    // TODO return the string representation of the underlying table
-    return "";
+    //  return the string representation of the underlying table
+    final String printing = "";
+    for (int i = 0; i < table.size(); i++) {
+      for (Entry<K, V> e : table.get(i)) {
+        printing.concat(" Key: " + e.getKey() + " Value: " + e.getValue());
+      }
+    }
+    return printing;
   }
 
   public boolean equals(final Object that) {
@@ -148,8 +195,9 @@ public class MyHashMap<K, V> implements Map<K, V> {
     } else if (!(that instanceof Map)) {
       return false;
     } else {
-      // TODO simply compare the entry sets
-      return false;
+      //  simply compare the entry sets
+      if (this.entrySet().equals(((Map) that).entrySet())) return true;
+      else return false;
     }
   }
 
